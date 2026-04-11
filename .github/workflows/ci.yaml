@@ -7,7 +7,7 @@ jobs:
   sonarqube:
     runs-on: ubuntu-latest
     outputs:
-    quality_gate: ${{ steps.gate-check.outputs.quality-gate-status }}
+      quality_gate: ${{ steps.gate-check.outputs.quality-gate-status }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
