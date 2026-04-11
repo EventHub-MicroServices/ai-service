@@ -29,26 +29,26 @@ jobs:
 
 
   snyk-sca:
-  permissions:
-    security-events: write
-  runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    runs-on: ubuntu-latest
 
-  steps:
-    - uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v4
 
-    - name: Run Snyk to check for vulnerabilities
-      id: snyk
-      uses: snyk/actions/python@v3
-      continue-on-error: true
-      env:
-        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      with:
-        args: --sarif-file-output=snyk.sarif --monitor
+      - name: Run Snyk to check for vulnerabilities
+        id: snyk
+        uses: snyk/actions/python@v3
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --sarif-file-output=snyk.sarif --monitor
 
-    - name: Upload result to GitHub Code Scanning
-      uses: github/codeql-action/upload-sarif@v3
-      with:
-        sarif_file: snyk.sarif
+      - name: Upload result to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: snyk.sarif
 
   docker:
     runs-on: ubuntu-latest
