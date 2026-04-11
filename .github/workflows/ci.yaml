@@ -28,6 +28,16 @@ jobs:
       - name: Fail if Quality Gate fails
         if: steps.gate-check.outputs.quality-gate-status != 'PASSED'
         run: exit 1
+      - name: Slack alert (Sonar fail)
+        if: failure()
+        uses: slackapi/slack-github-action@v1.27.0
+        with:
+          payload: |
+            {
+              "text": "❌ SonarQube Quality Gate Failed\nRepo: ${{ github.repository }}"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
 
   snyk-sca:
@@ -45,48 +55,68 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --sarif-file-output=snyk.sarif --monitor
+          args: --sarif-file-output=snyk.sarif --severity-threshold=critical
 
       - name: Upload result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: snyk.sarif
+      - name: Fail if critical vulnerabilities found
+        if: steps.snyk.outcome == 'failure'
+        run: exit 1
+      - name: Slack alert (Snyk fail)
+        if: failure()
+        uses: slackapi/slack-github-action@v1.27.0
+        with:
+          payload: |
+            {
+              "text": "❌ Snyk Critical Vulnerabilities Found"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
-  # docker:
-  #   runs-on: ubuntu-latest
-  #   needs: [sonarqube, snyk-sca]
-
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
-
-  #     - name: Login to Docker Hub
-  #       uses: docker/login-action@v4
-  #       with:
-  #         username: ${{ secrets.DOCKERHUB_USERNAME }}
-  #         password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-  #     - name: Set up Buildx
-  #       uses: docker/setup-buildx-action@v4
-
-  #     - name: Build and push
-  #       uses: docker/build-push-action@v7
-  #       with:
-  #         context: .
-  #         push: true
-  #         tags: iyask/ai-service:v1.1.1
-  notifyslack:
+  docker:
     runs-on: ubuntu-latest
     needs: [sonarqube, snyk-sca]
-    if: always() 
+
     steps:
-      - name: Send Slack Notification
-        run: |
-          if [[ "${{ needs.sonarqube.result }}" != "success" || "${{ needs.snyk-sca.result }}" != "success" ]]; then
-            curl -X POST -H 'Content-type: application/json' \
-            --data '{
-              "text": "🚨 CI Pipeline Failed!\nSonarQube: ${{ needs.sonarqube.result }}\nSnyk: ${{ needs.snyk-sca.result }}\nRepo: ${{ github.repository }}\nCommit: ${{ github.sha }}"
-            }' ${{ secrets.SLACK_WEBHOOK_URL }}
-          fi
-              
-  
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 🏗️ Build image locally
+      - name: Build Docker image
+        run: docker build -t iyask/ai-service:latest .
+
+      # 🔍 Scan image BEFORE push
+      - name: Scan Docker image (Trivy)
+        id: trivy
+        uses: aquasecurity/trivy-action@v0.24.0
+        with:
+          image-ref: iyask/ai-service:latest
+          severity: CRITICAL,HIGH
+          exit-code: 1
+
+      # ❌ Slack alert if scan fails
+      - name: Slack alert (Image scan fail)
+        if: failure()
+        uses: slackapi/slack-github-action@v1.27.0
+        with:
+          payload: |
+            {
+              "text": "❌ Docker Image Scan Failed (CRITICAL vulnerabilities)\nRepo: ${{ github.repository }}"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      # 🔐 Login only if scan passed
+      - name: Login to Docker Hub
+        if: success()
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # 🚀 Push only if safe
+      - name: Push Docker image
+        if: success()
+        run: docker push iyask/ai-service:latest
