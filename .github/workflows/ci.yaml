@@ -38,7 +38,7 @@ jobs:
 
       - name: Run Snyk to check for vulnerabilities
         id: snyk
-        uses: snyk/actions/python@v3
+        uses: snyk/actions/python@master
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
