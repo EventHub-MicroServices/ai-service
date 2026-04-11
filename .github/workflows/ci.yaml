@@ -1,0 +1,16 @@
+name: ai service ci 
+
+on: push
+
+jobs:
+   sonarqube:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: SonarQube Scan
+      uses: SonarSource/sonarqube-scan-action@v7.1.0
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      
+
