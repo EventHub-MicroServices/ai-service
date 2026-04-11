@@ -126,6 +126,7 @@ jobs:
         with:
           payload: |
             {
+              "text": "Docker Image Scan Failed",
               "blocks": [
                 {
                   "type": "section",
