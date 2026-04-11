@@ -1,6 +1,8 @@
 name: ai service ci 
 
 on: push
+permissions:
+  security-events: write
 
 jobs:
 
