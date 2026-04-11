@@ -100,3 +100,14 @@ async def generate_event(request: EventGenerationRequest):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8007)
+\
+
+whduiwqhsdu
+wdfweq
+f
+w
+f
+
+efw
+
+this is very critcal;
