@@ -37,6 +37,10 @@ on:
         required: false
         type: string
         default: 'FAILED'
+      sonar_project_key:
+        required: false
+        type: string
+        default: 'EventHub-MicroServices_ai-service'
       # Snyk specific
       snyk_critical:
         required: false
@@ -119,6 +123,11 @@ jobs:
                       "type": "button",
                       "text": { "type": "plain_text", "text": "🔗 View GitHub Run" },
                       "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                    },
+                    {
+                      "type": "button",
+                      "text": { "type": "plain_text", "text": "📊 SonarCloud Dashboard" },
+                      "url": "https://sonarcloud.io/dashboard?id=${{ inputs.sonar_project_key }}"
                     }
                   ]
                 },
