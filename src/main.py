@@ -101,22 +101,22 @@ if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8007)
 
-# --- INTENTIONAL VULNERABILITIES TO FAIL SONARQUBE ---
+# # --- INTENTIONAL VULNERABILITIES TO FAIL SONARQUBE ---
 
-def trigger_xss(user_input):
-    # This is an intentional Remote Code Execution (RCE) / Eval vulnerability
-    return eval(user_input)
+# def trigger_xss(user_input):
+#     # This is an intentional Remote Code Execution (RCE) / Eval vulnerability
+#     return eval(user_input)
 
-def get_db_connection():
-    # Intentional hardcoded credentials (Security Hotspot / Vulnerability)
-    db_password = "super_secret_production_password_123!"
-    db_token = "aws_secret_key_AKIA1234567890"
-    return db_password, db_token
+# def get_db_connection():
+#     # Intentional hardcoded credentials (Security Hotspot / Vulnerability)
+#     db_password = "super_secret_production_password_123!"
+#     db_token = "aws_secret_key_AKIA1234567890"
+#     return db_password, db_token
 
-def unused_variables_and_code_smells():
-    # Intentional code smells
-    x = 1
-    x = 1
-    y = 2
-    return True
-    print("This is unreachable code!") # Bug/Code Smell
+# def unused_variables_and_code_smells():
+#     # Intentional code smells
+#     x = 1
+#     x = 1
+#     y = 2
+#     return True
+#     print("This is unreachable code!") # Bug/Code Smell

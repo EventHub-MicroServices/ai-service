@@ -17,24 +17,11 @@ env:
 jobs:
 
   # ─────────────────────────────────────────────────────────────────────────────
-  # Gate: only proceed if CI workflow passed
-  # ─────────────────────────────────────────────────────────────────────────────
-  check-ci-status:
-    name: Check CI Status
-    runs-on: ubuntu-latest
-    if: github.event.workflow_run.conclusion == 'success'
-    steps:
-      - name: CI passed — proceeding to Docker pipeline
-        run: echo "CI passed. Starting Docker build pipeline."
-
-
-  # ─────────────────────────────────────────────────────────────────────────────
   # JOB 1: Build Docker Image
   # ─────────────────────────────────────────────────────────────────────────────
   docker-build:
     name: Build Docker Image
     runs-on: ubuntu-latest
-    needs: check-ci-status
     outputs:
       error_msg: ${{ steps.capture-error.outputs.error_msg }}
 

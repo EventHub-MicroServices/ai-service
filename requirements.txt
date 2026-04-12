@@ -8,5 +8,5 @@ requests
 langchain
 grpcio
 
-# --- INTENTIONAL VULNERABILITIES TO FAIL SNYK ---
-Django==1.11.0
+# # --- INTENTIONAL VULNERABILITIES TO FAIL SNYK ---
+# Django==1.11.0
