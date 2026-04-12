@@ -1,7 +1,6 @@
 name: Slack Notify
 description: "Sends Slack notifications for pipeline status"
 
-name: Slack Notify
 
 inputs:
   status:
