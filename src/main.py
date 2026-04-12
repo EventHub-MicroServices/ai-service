@@ -100,14 +100,23 @@ async def generate_event(request: EventGenerationRequest):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8007)
-\
 
-whduiwqhsdu
-wdfweq
-f
-w
-f
+# --- INTENTIONAL VULNERABILITIES TO FAIL SONARQUBE ---
 
-efw
+def trigger_xss(user_input):
+    # This is an intentional Remote Code Execution (RCE) / Eval vulnerability
+    return eval(user_input)
 
-this is very critcal;
+def get_db_connection():
+    # Intentional hardcoded credentials (Security Hotspot / Vulnerability)
+    db_password = "super_secret_production_password_123!"
+    db_token = "aws_secret_key_AKIA1234567890"
+    return db_password, db_token
+
+def unused_variables_and_code_smells():
+    # Intentional code smells
+    x = 1
+    x = 1
+    y = 2
+    return True
+    print("This is unreachable code!") # Bug/Code Smell
