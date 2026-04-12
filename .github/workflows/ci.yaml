@@ -83,23 +83,19 @@ jobs:
         if: steps.gate-check.outputs.quality-gate-status != 'PASSED'
         run: exit 1
 
-  # Notify Slack if SonarQube failed
-  notify-sonar-fail:
-    name: Sonar Failure
-    needs: sonarqube
-    if: failure() && needs.sonarqube.result == 'failure'
-    uses: ./.github/workflows/notify.yaml
-    with:
-      status: "failed"
-      pipeline: "CI"
-      job_name: "sonarqube"
-      sonar_bugs: ${{ needs.sonarqube.outputs.bugs }}
-      sonar_vulnerabilities: ${{ needs.sonarqube.outputs.vulnerabilities }}
-      sonar_code_smells: ${{ needs.sonarqube.outputs.code_smells }}
-      sonar_coverage: ${{ needs.sonarqube.outputs.coverage }}
-      sonar_gate_status: ${{ needs.sonarqube.outputs.quality_gate }}
-    secrets:
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      - name: Slack Failure Notification
+        if: failure()
+        uses: ./.github/actions/slack-notify
+        with:
+          status: "failed"
+          pipeline: "CI"
+          job_name: "sonarqube"
+          sonar_bugs: ${{ steps.sonar-metrics.outputs.bugs }}
+          sonar_vulnerabilities: ${{ steps.sonar-metrics.outputs.vulnerabilities }}
+          sonar_code_smells: ${{ steps.sonar-metrics.outputs.code_smells }}
+          sonar_coverage: ${{ steps.sonar-metrics.outputs.coverage }}
+          sonar_gate_status: ${{ steps.gate-check.outputs.quality-gate-status }}
+          slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
 
 
   # ─────────────────────────────────────────────────────────────────────────────
@@ -155,22 +151,18 @@ jobs:
         if: steps.snyk.outcome == 'failure'
         run: exit 1
 
-  # Notify Slack if Snyk failed
-  notify-snyk-fail:
-    name: Snyk Failure
-    needs: snyk-sca
-    if: failure() && needs.snyk-sca.result == 'failure'
-    uses: ./.github/workflows/notify.yaml
-    with:
-      status: "failed"
-      pipeline: "CI"
-      job_name: "snyk-sca"
-      snyk_critical: ${{ needs.snyk-sca.outputs.critical }}
-      snyk_high:     ${{ needs.snyk-sca.outputs.high }}
-      snyk_medium:   ${{ needs.snyk-sca.outputs.medium }}
-      error_message: ${{ needs.snyk-sca.outputs.error_msg }}
-    secrets:
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      - name: Slack Failure Notification
+        if: failure()
+        uses: ./.github/actions/slack-notify
+        with:
+          status: "failed"
+          pipeline: "CI"
+          job_name: "snyk-sca"
+          snyk_critical: ${{ steps.snyk-counts.outputs.critical }}
+          snyk_high: ${{ steps.snyk-counts.outputs.high }}
+          snyk_medium: ${{ steps.snyk-counts.outputs.medium }}
+          error_message: ${{ steps.snyk-counts.outputs.error_msg }}
+          slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
 
   # ─────────────────────────────────────────────────────────────────────────────
   # JOB 3: Call Docker Pipeline Workflow
