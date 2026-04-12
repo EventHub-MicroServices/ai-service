@@ -78,6 +78,7 @@ on:
 
 jobs:
   send-slack-message:
+    name: Slack
     runs-on: ubuntu-latest
     steps:
 

@@ -16,7 +16,7 @@ jobs:
   # JOB 1: SonarQube SAST Scan
   # ─────────────────────────────────────────────────────────────────────────────
   sonarqube:
-    name: SonarQube Scan
+    name: SonarQube
     runs-on: ubuntu-latest
     outputs:
       quality_gate: ${{ steps.gate-check.outputs.quality-gate-status }}
@@ -85,7 +85,7 @@ jobs:
 
   # Notify Slack if SonarQube failed
   notify-sonar-fail:
-    name: Notify — SonarQube Failure
+    name: Sonar Failure
     needs: sonarqube
     if: failure() && needs.sonarqube.result == 'failure'
     uses: ./.github/workflows/notify.yaml
@@ -106,7 +106,7 @@ jobs:
   # JOB 2: Snyk SCA Scan (runs in parallel with SonarQube)
   # ─────────────────────────────────────────────────────────────────────────────
   snyk-sca:
-    name: Snyk SCA Scan
+    name: Snyk
     runs-on: ubuntu-latest
     permissions:
       security-events: write
@@ -157,7 +157,7 @@ jobs:
 
   # Notify Slack if Snyk failed
   notify-snyk-fail:
-    name: Notify — Snyk Failure
+    name: Snyk Failure
     needs: snyk-sca
     if: failure() && needs.snyk-sca.result == 'failure'
     uses: ./.github/workflows/notify.yaml
@@ -176,7 +176,7 @@ jobs:
   # JOB 3: Call Docker Pipeline Workflow
   # ─────────────────────────────────────────────────────────────────────────────
   trigger-docker-pipeline:
-    name: Run Docker Pipeline
+    name: Docker
     needs: [sonarqube, snyk-sca]
     if: github.ref == 'refs/heads/main'
     uses: ./.github/workflows/docker.yaml

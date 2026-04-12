@@ -17,7 +17,7 @@ jobs:
   # JOB 1: Build Docker Image
   # ─────────────────────────────────────────────────────────────────────────────
   docker-build:
-    name: Build Docker Image
+    name: Build
     runs-on: ubuntu-latest
     outputs:
       error_msg: ${{ steps.capture-error.outputs.error_msg }}
@@ -58,7 +58,7 @@ jobs:
 
   # Notify Slack if build failed
   notify-build-fail:
-    name: Notify — Build Failure
+    name: Build Fail
     needs: docker-build
     if: failure() && needs.docker-build.result == 'failure'
     uses: ./.github/workflows/notify.yaml
@@ -77,7 +77,7 @@ jobs:
   # JOB 2: Trivy Image Scan
   # ─────────────────────────────────────────────────────────────────────────────
   trivy-scan:
-    name: Trivy Image Scan
+    name: Trivy
     runs-on: ubuntu-latest
     needs: docker-build
     outputs:
@@ -142,7 +142,7 @@ jobs:
 
   # Notify Slack if Trivy scan failed
   notify-trivy-fail:
-    name: Notify — Trivy Failure
+    name: Trivy Fail
     needs: [trivy-scan]
     if: failure() && needs.trivy-scan.result == 'failure'
     uses: ./.github/workflows/notify.yaml
@@ -162,7 +162,7 @@ jobs:
   # JOB 3: Push to Docker Hub
   # ─────────────────────────────────────────────────────────────────────────────
   docker-push:
-    name: Push to Docker Hub
+    name: Push
     runs-on: ubuntu-latest
     needs: trivy-scan
     outputs:
@@ -200,7 +200,7 @@ jobs:
 
   # Notify Slack if push failed
   notify-push-fail:
-    name: Notify — Push Failure
+    name: Push Fail
     needs: docker-push
     if: failure() && needs.docker-push.result == 'failure'
     uses: ./.github/workflows/notify.yaml
@@ -219,7 +219,7 @@ jobs:
   # JOB 4: Success Notification (only if ALL jobs passed)
   # ─────────────────────────────────────────────────────────────────────────────
   notify-success:
-    name: Notify — Pipeline Success
+    name: Success
     # runs-on: ubuntu-latest
     needs: [docker-build, trivy-scan, docker-push]
     if: success()
