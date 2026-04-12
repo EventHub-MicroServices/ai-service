@@ -245,5 +245,5 @@ jobs:
       job_name: "all"
       docker_image: "iyask/ai-service"
       docker_tag: ${{ github.sha }}
-    secrets:
+    env:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
