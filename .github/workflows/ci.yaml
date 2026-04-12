@@ -88,7 +88,7 @@ jobs:
     name: Notify — SonarQube Failure
     needs: sonarqube
     if: failure() && needs.sonarqube.result == 'failure'
-    uses: ./.github/workflows/notify.yml
+    uses: ./.github/workflows/notify.yaml
     with:
       status: "failed"
       pipeline: "CI"
@@ -160,7 +160,7 @@ jobs:
     name: Notify — Snyk Failure
     needs: snyk-sca
     if: failure() && needs.snyk-sca.result == 'failure'
-    uses: ./.github/workflows/notify.yml
+    uses: ./.github/workflows/notify.yaml
     with:
       status: "failed"
       pipeline: "CI"
