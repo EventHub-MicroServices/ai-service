@@ -235,7 +235,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   notify-success:
     name: Notify — Pipeline Success
-    runs-on: ubuntu-latest
+    # runs-on: ubuntu-latest
     needs: [docker-build, trivy-scan, docker-push]
     if: success()
     uses: ./.github/workflows/notify.yaml
