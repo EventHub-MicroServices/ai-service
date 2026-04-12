@@ -32,9 +32,10 @@ jobs:
       - name: Build Docker image
         id: build
         run: |
+          set -o pipefail
           docker buildx build \
-            --cache-from=type=gha,scope=${{ github.workflow }} \
-            --cache-to=type=gha,mode=max,scope=${{ github.workflow }} \
+            --cache-from="type=gha,scope=${{ github.workflow }}" \
+            --cache-to="type=gha,mode=max,scope=${{ github.workflow }}" \
             -t ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} \
             --load . 2>&1 | tee build.log
 
@@ -127,6 +128,7 @@ jobs:
       - name: Push Docker image
         id: push
         run: |
+          set -o pipefail
           docker tag ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} ${{ env.IMAGE_NAME }}:latest
           docker push ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} 2>&1 | tee push.log
           docker push ${{ env.IMAGE_NAME }}:latest 2>&1 | tee -a push.log
