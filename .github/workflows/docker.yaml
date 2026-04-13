@@ -1,7 +1,12 @@
 name: Docker — Build, Scan & Push
 
 on:
-  workflow_call:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Docker Image Tag (Format: v*.*.*, e.g., v1.0.0)'
+        required: true
+        default: 'v1.0.0'
 
 permissions:
   security-events: write
@@ -9,7 +14,6 @@ permissions:
 
 env:
   IMAGE_NAME: iyask/ai-service
-  IMAGE_TAG:  ${{ github.sha }}
 
 jobs:
 
@@ -24,9 +28,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Validate Version Tag Format
+        run: |
+          TAG="${{ github.event.inputs.image_tag }}"
+          if [[ ! $TAG =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Invalid tag format: '$TAG'. Must follow v*.*.* (e.g., v1.2.3)"
+            exit 1
+          fi
+          echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
 
       # 🐳 [1] BUILD ────────────────────────────────────────────────────────────
       - name: Build Docker image
@@ -34,8 +46,6 @@ jobs:
         run: |
           set -o pipefail
           docker buildx build \
-            --cache-from="type=gha,scope=${{ github.workflow }}" \
-            --cache-to="type=gha,mode=max,scope=${{ github.workflow }}" \
             -t ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} \
             --load . 2>&1 | tee build.log
 
@@ -134,9 +144,7 @@ jobs:
         id: push
         run: |
           set -o pipefail
-          docker tag ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} ${{ env.IMAGE_NAME }}:latest
           docker push ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} 2>&1 | tee push.log
-          docker push ${{ env.IMAGE_NAME }}:latest              2>&1 | tee -a push.log
 
       - name: Capture push error
         id: capture-push-error
