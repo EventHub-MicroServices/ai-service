@@ -124,8 +124,16 @@ runs:
         EMAIL_DETAIL=""
 
         if [ "$STATUS" = "success" ]; then
-          DETAIL="✅ SonarQube — Quality Gate Passed\n✅ Snyk — No Critical Vulnerabilities\n✅ Docker Build — Success\n✅ Trivy Scan — No Critical CVEs\n✅ Docker Push — Image Published\n\n\`\`\`docker pull ${{ inputs.docker_image }}:${{ inputs.docker_tag }}\`\`\`"
-          EMAIL_DETAIL="- SonarQube: Quality Gate Passed\n- Snyk: No Critical Vulnerabilities\n- Docker Build: Success\n- Trivy Scan: No Critical CVEs\n- Docker Push: Image Published\n\nPull command:\n  docker pull ${{ inputs.docker_image }}:${{ inputs.docker_tag }}"
+          if [ "${{ inputs.pipeline }}" = "CI" ]; then
+            DETAIL="✅ SonarQube — Quality Gate Passed\n✅ Snyk — No Critical Vulnerabilities"
+            EMAIL_DETAIL="- SonarQube: Quality Gate Passed\n- Snyk: No Critical Vulnerabilities"
+          elif [ "${{ inputs.pipeline }}" = "Docker" ]; then
+            DETAIL="✅ Docker Build — Success\n✅ Trivy Scan — No Critical CVEs\n✅ Docker Push — Image Published\n\n\`\`\`docker pull ${{ inputs.docker_image }}:${{ inputs.docker_tag }}\`\`\`"
+            EMAIL_DETAIL="- Docker Build: Success\n- Trivy Scan: No Critical CVEs\n- Docker Push: Image Published\n\nPull command:\n  docker pull ${{ inputs.docker_image }}:${{ inputs.docker_tag }}"
+          else
+            DETAIL="✅ Pipeline completed successfully."
+            EMAIL_DETAIL="Pipeline completed successfully."
+          fi
         else
           case "$JOB" in
             sonarqube)
