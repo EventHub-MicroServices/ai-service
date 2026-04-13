@@ -163,13 +163,16 @@ runs:
           esac
         fi
 
-        # GitHub Actions can't pass multi-line strings through GITHUB_OUTPUT
-        # directly inside expressions, so we encode newlines as the literal
-        # two-char sequence \n and decode them in the Slack payload below.
+        # Slack requires JSON formatting where newlines are literal \n strings.
         DETAIL_ENCODED="${DETAIL//$'\n'/\\n}"
-        echo "detail=$DETAIL_ENCODED"               >> $GITHUB_OUTPUT
-        EMAIL_DETAIL_ENCODED="${EMAIL_DETAIL//$'\n'/\\n}"
-        echo "email_detail=$EMAIL_DETAIL_ENCODED"   >> $GITHUB_OUTPUT
+        echo "detail=$DETAIL_ENCODED" >> $GITHUB_OUTPUT
+
+        # Emails require actual real multi-line strings to render properly in plain-text and <pre>.
+        # Convert literal \n representations into real Bash newlines, and use EOF syntax to safely push to GITHUB_OUTPUT.
+        EMAIL_DETAIL_REAL="${EMAIL_DETAIL//\\n/$'\n'}"
+        echo "email_detail<<EOF_EMAIL_MARKER" >> $GITHUB_OUTPUT
+        echo "$EMAIL_DETAIL_REAL" >> $GITHUB_OUTPUT
+        echo "EOF_EMAIL_MARKER" >> $GITHUB_OUTPUT
 
         # ── Secondary action buttons (job-specific) ───────────────────────────
         # Build a JSON array of extra button elements beyond the always-present
